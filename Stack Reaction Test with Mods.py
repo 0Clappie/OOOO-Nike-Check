@@ -10,8 +10,15 @@ info = pygame.display.Info()
 WIDTH, HEIGHT = info.current_w, info.current_h
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("No Spoilers")
-FPS = 360
+pygame.display.set_caption("Reaction Test")
+FPS = input("Please enter your monitor's refresh rate (in an integer): ")
+
+while not FPS.isdigit():
+    FPS = input("Please enter your monitor's refresh rate (in an integer): ")
+
+while FPS.isdigit():
+    FPS = int(FPS)
+    break
 
 font = pygame.font.SysFont('timesnewroman.ttf', 36)
 font2 = pygame.font.SysFont('timesnewroman.ttf', 72)

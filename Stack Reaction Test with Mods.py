@@ -69,12 +69,6 @@ def calculate_average(current_average, tally, new_time):
     return (current_average * (tally - 1) + new_time) / tally
 
 
-def wait_for_click():
-    waiting = True
-    while waiting:
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            waiting = False
-
 # =========================
 # GAME VARIABLES
 # =========================
@@ -83,7 +77,7 @@ running = True
 game_state = START
 
 start_time = 0
-wait_time = 0
+pause_tick = 0
 
 reaction_time = 0
 average_time = 0
@@ -128,8 +122,8 @@ while running:
                 game_state = FALSE_START
 
             elif game_state == FALSE_START:
-                wait_for_click()
                 game_state = WAITING
+                start_time = current_time + get_random_delay(2000, 5000)
 
             elif game_state in [REACT, FINAL_REACT]:
 

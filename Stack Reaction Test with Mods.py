@@ -1,9 +1,13 @@
 import pygame
 import random
-import time
 import os
 
+# =========================
+# INITIALIZATION
+# =========================
+
 os.environ['SDL_VIDEO_CENTERED'] = '1'
+
 pygame.init()
 
 info = pygame.display.Info()
@@ -11,95 +15,221 @@ WIDTH, HEIGHT = info.current_w, info.current_h
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("No Spoilers")
+
+CLOCK = pygame.time.Clock()
 FPS = 1040
 
-font = pygame.font.SysFont('Segoe UI', 36)
-font2 = pygame.font.SysFont('Segoe UI', 72)
+# =========================
+# COLORS
+# =========================
 
-blue = (0, 0, 255)
-black = (0, 0, 0)
-pink = (255, 192, 203)
+BLACK = (0, 0, 0)
+BLUE = (0, 0, 255)
+PINK = (255, 192, 203)
+GREEN = (0, 255, 0)
+WHITE = (255, 255, 255)
+
+# =========================
+# FONTS
+# =========================
+
+FONT = pygame.font.SysFont("Segoe UI", 36)
+BIG_FONT = pygame.font.SysFont("Segoe UI", 72)
+
+# =========================
+# GAME STATES
+# =========================
+
+START = "start"
+WAITING = "waiting"
+REACT = "react"
+FINAL_REACT = "final_react"
+FINISHED = "finished"
+
+# =========================
+# HELPER FUNCTIONS
+# =========================
+
+def draw_text(surface, text, font, color, position):
+    text_surface = font.render(text, True, color)
+    surface.blit(text_surface, text_surface.get_rect(center=position))
 
 
-def circle(color, radii):
-    pygame.draw.circle(screen, color, (WIDTH//2, HEIGHT//2), radii)
+def draw_circle(color, radius):
+    pygame.draw.circle(screen, color, (WIDTH // 2, HEIGHT // 2), radius)
 
 
-text = font.render("Press either mouse button, this is a reaction test. "
-                   "Relax your hand and please prepare yourself to react!", True, (0, 255, 0))
-text_2 = font2.render("Please read!", True, (0, 255, 0))
-r_surf = None
-ar_surf = None
-r_surf_2 = None
-ar_surf_2 = None
+def get_random_delay():
+    return random.randint(2000, 5000)
 
-game_state = "start"
+
+def calculate_average(current_average, tally, new_time):
+    return (current_average * (tally - 1) + new_time) / tally
+
+
+# =========================
+# GAME VARIABLES
+# =========================
+
+running = True
+game_state = START
+
 start_time = 0
+
+reaction_time = 0
 average_time = 0
 
 count = 0
-end = False
-running = True
 
-Clock = pygame.time.Clock()
+# =========================
+# MAIN LOOP
+# =========================
 
 while running:
 
-    Clock.tick(FPS)
+    CLOCK.tick(FPS)
+
     current_time = pygame.time.get_ticks()
 
+    # =====================
+    # EVENT HANDLING
+    # =====================
+
     for event in pygame.event.get():
+
         if event.type == pygame.QUIT:
             running = False
+
+        if event.type == pygame.KEYDOWN:
+
+            if event.key == pygame.K_ESCAPE:
+                running = False
+
+            if event.key == pygame.K_q:
+                running = False
+
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if game_state == "start":
-                game_state = "wait"
-                start_time = current_time + random.uniform(2000, 5000)
-            if game_state == "wait_for_reaction":
-                game_state = "wait"
-                reaction_time = (current_time - start_time) / 1000
-                start_time = current_time + random.uniform(2000, 5000)
-                count += 1
-                average_time = (average_time * (count - 1) + reaction_time) / count
-                r_surf = font.render(f"REACTION TIME: {reaction_time:.03f}s", True, (255, 255, 255))
-                ar_surf = font.render(f"AVERAGE REACTION TIME IS: {average_time:.03f}s", True, (255, 255, 255))
-            if game_state == "wait_for_reaction_2":
-                game_state = "wait"
-                reaction_time = (current_time - start_time) / 1000
-                start_time = current_time + random.uniform(2000, 5000)
-                count += 1
-                average_time = (average_time * (count - 1) + reaction_time) / count
-                r_surf_2 = font.render(f"'Just Do It' REACTION TIME: {reaction_time:.03f}s", True, (255, 255, 255))
-                ar_surf_2 = font.render("Game is complete, please take note of your numbers and exit using "
-                                        "task manager", False, (255, 255, 255))
 
-    if game_state == "wait":
-        while game_state == 'wait' and end is True:
-            time.sleep(60)
+            if game_state == START:
+
+                game_state = WAITING
+                start_time = current_time + get_random_delay()
+
+            elif game_state in [REACT, FINAL_REACT]:
+
+                reaction_time = (current_time - start_time) / 1000
+
+                count += 1
+
+                average_time = calculate_average(
+                    average_time,
+                    count,
+                    reaction_time
+                )
+
+                if game_state == FINAL_REACT:
+                    game_state = FINISHED
+                else:
+                    game_state = WAITING
+                    start_time = current_time + get_random_delay()
+
+    # =====================
+    # GAME LOGIC
+    # =====================
+
+    if game_state == WAITING:
+
         if current_time >= start_time:
-            game_state = "wait_for_reaction"
-            if count == 4:
-                game_state = "wait_for_reaction_2"
 
-    screen.fill(black)
+            if count >= 4:
+                game_state = FINAL_REACT
+            else:
+                game_state = REACT
 
-    center = screen.get_rect().center
+    # =====================
+    # DRAWING
+    # =====================
 
-    if game_state == "start":
-        screen.blit(text, text.get_rect(center=center))
-        screen.blit(text_2, text_2.get_rect(center=(center[0], center[1]-HEIGHT//4)))
-    if game_state == "wait_for_reaction":
-        circle(blue, 20)
-    if game_state == "wait_for_reaction_2":
-        circle(pink, 2000)
-    if r_surf:
-        screen.blit(r_surf, r_surf.get_rect(center=(center[0], HEIGHT - 125)))
-    if ar_surf:
-        screen.blit(ar_surf, ar_surf.get_rect(center=(center[0], HEIGHT - 75)))
-    if r_surf_2:
-        screen.blit(r_surf_2, r_surf_2.get_rect(center=(center[0], HEIGHT - 25)))
-    if ar_surf_2:
-        screen.blit(ar_surf_2, ar_surf_2.get_rect(center=(center[0], center[1])))
-        end = True
+    screen.fill(BLACK)
+
+    center_x = WIDTH // 2
+    center_y = HEIGHT // 2
+
+    if game_state == START:
+
+        draw_text(
+            screen,
+            "Please read!",
+            BIG_FONT,
+            GREEN,
+            (center_x, center_y - HEIGHT // 4)
+        )
+
+        draw_text(
+            screen,
+            "Press either mouse button. Relax and prepare to react.",
+            FONT,
+            GREEN,
+            (center_x, center_y)
+        )
+
+    elif game_state == REACT:
+
+        draw_circle(BLUE, 20)
+
+    elif game_state == FINAL_REACT:
+
+        draw_circle(PINK, 2000)
+
+    elif game_state == FINISHED:
+
+        draw_text(
+            screen,
+            f"FINAL REACTION TIME: {reaction_time:.03f}s",
+            FONT,
+            WHITE,
+            (center_x, center_y - 60)
+        )
+
+        draw_text(
+            screen,
+            f"AVERAGE REACTION TIME: {average_time:.03f}s",
+            FONT,
+            WHITE,
+            (center_x, center_y)
+        )
+
+        draw_text(
+            screen,
+            "Press ESC or Q to quit.",
+            FONT,
+            WHITE,
+            (center_x, center_y + 60)
+        )
+
+    # Persistent stats display
+    if count > 0 and game_state != FINISHED:
+
+        draw_text(
+            screen,
+            f"REACTION TIME: {reaction_time:.03f}s",
+            FONT,
+            WHITE,
+            (center_x, HEIGHT - 125)
+        )
+
+        draw_text(
+            screen,
+            f"AVERAGE REACTION TIME: {average_time:.03f}s",
+            FONT,
+            WHITE,
+            (center_x, HEIGHT - 75)
+        )
 
     pygame.display.flip()
+
+# =========================
+# CLEAN EXIT
+# =========================
+
+pygame.quit()

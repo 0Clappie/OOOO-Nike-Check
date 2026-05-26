@@ -6,15 +6,15 @@ import os
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 pygame.init()
 
-FPS = 1040
 info = pygame.display.Info()
 WIDTH, HEIGHT = info.current_w, info.current_h
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Reaction Test")
+pygame.display.set_caption("No Spoilers")
+FPS = 360
 
-font = pygame.font.SysFont('Segoe UI', 36)
-font2 = pygame.font.SysFont('Segoe UI', 72)
+font = pygame.font.SysFont('timesnewroman.ttf', 36)
+font2 = pygame.font.SysFont('timesnewroman.ttf', 72)
 
 blue = (0, 0, 255)
 black = (0, 0, 0)
@@ -26,8 +26,8 @@ def circle(color, radii):
 
 
 text = font.render("Press either mouse button, this is a reaction test. "
-                   "Relax your hand and please prepare yourself to react!", True, (0, 255, 0))
-text_2 = font2.render("Please read!", True, (0, 255, 0))
+                   "Relax your hand and please prepare yourself to react!", False, (0, 255, 0))
+text_2 = font2.render("Please read!", False, (0, 255, 0))
 r_surf = None
 ar_surf = None
 r_surf_2 = None
@@ -51,6 +51,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+            pygame.quit()
         if event.type == pygame.MOUSEBUTTONDOWN:
             if game_state == "start":
                 game_state = "wait"
@@ -61,17 +62,17 @@ while running:
                 start_time = current_time + random.uniform(2000, 5000)
                 count += 1
                 average_time = (average_time * (count - 1) + reaction_time) / count
-                r_surf = font.render(f"REACTION TIME: {reaction_time:.03f}s", True, (255, 255, 255))
-                ar_surf = font.render(f"AVERAGE REACTION TIME: {average_time:.03f}s", True, (255, 255, 255))
+                r_surf = font.render(f"REACTION TIME: {reaction_time:.03f}s", False, (255, 255, 255))
+                ar_surf = font.render(f"AVERAGE REACTION TIME IS: {average_time:.03f}s", False, (255, 255, 255))
             if game_state == "wait_for_reaction_2":
                 game_state = "wait"
                 reaction_time = (current_time - start_time) / 1000
                 start_time = current_time + random.uniform(2000, 5000)
                 count += 1
                 average_time = (average_time * (count - 1) + reaction_time) / count
-                r_surf_2 = font.render(f"'Just Do It' REACTION TIME: {reaction_time:.03f}s", True, (255, 255, 255))
+                r_surf_2 = font.render(f"'Just Do It' REACTION TIME: {reaction_time:.03f}s", False, (255, 255, 255))
                 ar_surf_2 = font.render("Game is complete, please take note of your numbers and exit using "
-                                        "task manager", True, (255, 255, 255))
+                                        "task manager", False, (255, 255, 255))
 
     if game_state == "wait":
         while game_state == 'wait' and end is True:

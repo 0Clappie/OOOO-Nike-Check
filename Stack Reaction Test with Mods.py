@@ -43,12 +43,14 @@ BIG_FONT = pygame.font.SysFont("Segoe UI", 72)
 START = "start"
 WAITING = "waiting"
 REACT = "react"
+FALSE_START = "false_start"
 FINAL_REACT = "final_react"
 FINISHED = "finished"
 
 # =========================
 # HELPER FUNCTIONS
 # =========================
+
 
 def draw_text(surface, text, font, color, position):
     text_surface = font.render(text, True, color)
@@ -59,13 +61,19 @@ def draw_circle(color, radius):
     pygame.draw.circle(screen, color, (WIDTH // 2, HEIGHT // 2), radius)
 
 
-def get_random_delay():
-    return random.randint(2000, 5000)
+def get_random_delay(start, finish):
+    return random.uniform(start, finish)
 
 
 def calculate_average(current_average, tally, new_time):
     return (current_average * (tally - 1) + new_time) / tally
 
+
+def wait_for_click():
+    waiting = True
+    while waiting:
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            waiting = False
 
 # =========================
 # GAME VARIABLES
@@ -75,6 +83,7 @@ running = True
 game_state = START
 
 start_time = 0
+wait_time = 0
 
 reaction_time = 0
 average_time = 0
@@ -111,9 +120,16 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
 
             if game_state == START:
-
                 game_state = WAITING
-                start_time = current_time + get_random_delay()
+                start_time = current_time + get_random_delay(2000, 5000)
+
+            elif game_state == WAITING:
+                start_time = current_time + get_random_delay(2000, 5000)
+                game_state = FALSE_START
+
+            elif game_state == FALSE_START:
+                wait_for_click()
+                game_state = WAITING
 
             elif game_state in [REACT, FINAL_REACT]:
 
@@ -129,9 +145,10 @@ while running:
 
                 if game_state == FINAL_REACT:
                     game_state = FINISHED
+
                 else:
                     game_state = WAITING
-                    start_time = current_time + get_random_delay()
+                    start_time = current_time + get_random_delay(2000, 5000)
 
     # =====================
     # GAME LOGIC
@@ -168,6 +185,24 @@ while running:
         draw_text(
             screen,
             "Press either mouse button. Relax and prepare to react.",
+            FONT,
+            GREEN,
+            (center_x, center_y)
+        )
+
+    elif game_state == FALSE_START:
+        draw_text(
+            screen,
+            "You have pressed the mouse button too early. Please prepare, then press the mouse button again.",
+            FONT,
+            GREEN,
+            (center_x, center_y)
+        )
+
+    elif game_state == WAITING:
+        draw_text(
+            screen,
+            "",
             FONT,
             GREEN,
             (center_x, center_y)

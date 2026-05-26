@@ -77,7 +77,6 @@ running = True
 game_state = START
 
 start_time = 0
-pause_tick = 0
 
 reaction_time = 0
 average_time = 0

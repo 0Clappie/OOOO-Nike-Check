@@ -14,7 +14,7 @@ info = pygame.display.Info()
 WIDTH, HEIGHT = info.current_w, info.current_h
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("No Spoilers")
+pygame.display.set_caption("Reaction Test")
 
 CLOCK = pygame.time.Clock()
 FPS = 1040
@@ -114,15 +114,15 @@ while running:
 
             if game_state == START:
                 game_state = WAITING
-                start_time = current_time + get_random_delay(2000, 5000)
+                start_time = current_time + get_random_delay(3500, 7000)
 
             elif game_state == WAITING:
-                start_time = current_time + get_random_delay(2000, 5000)
+                start_time = current_time + get_random_delay(3500, 7000)
                 game_state = FALSE_START
 
             elif game_state == FALSE_START:
                 game_state = WAITING
-                start_time = current_time + get_random_delay(2000, 5000)
+                start_time = current_time + get_random_delay(3500, 7000)
 
             elif game_state in [REACT, FINAL_REACT]:
 
@@ -141,7 +141,7 @@ while running:
 
                 else:
                     game_state = WAITING
-                    start_time = current_time + get_random_delay(2000, 5000)
+                    start_time = current_time + get_random_delay(3500, 7000)
 
     # =====================
     # GAME LOGIC
@@ -207,13 +207,13 @@ while running:
 
     elif game_state == FINAL_REACT:
 
-        draw_circle(PINK, 2000)
+        draw_circle(PINK, 4096)
 
     elif game_state == FINISHED:
 
         draw_text(
             screen,
-            f"FINAL REACTION TIME: {reaction_time:.03f}s",
+            f"'Just Do It' REACTION TIME: {reaction_time:.03f}s",
             FONT,
             WHITE,
             (center_x, center_y - 60)
@@ -221,7 +221,7 @@ while running:
 
         draw_text(
             screen,
-            f"AVERAGE REACTION TIME: {average_time:.03f}s",
+            f"THINKING REACTION TIME: {average_time:.03f}s",
             FONT,
             WHITE,
             (center_x, center_y)
